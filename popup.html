@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Upskill Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 340px;
+    min-height: 480px;
+    background: #0f0f0f;
+    color: #e8e8e8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #1f1f1f;
+  }
+  .logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #3ea6ff 0%, #2ecc71 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .header-text h1 { font-size: 14px; font-weight: 600; color: #fff; }
+  .header-text p  { font-size: 11px; color: #666; }
+
+  /* Auth section */
+  .auth-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .auth-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #444;
+    flex-shrink: 0;
+  }
+  .dot.connected { background: #2ecc71; }
+  .dot.error     { background: #e74c3c; }
+
+  /* Buttons */
+  .btn {
+    background: transparent;
+    border: 1px solid #333;
+    color: #e8e8e8;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { background: #1a1a1a; border-color: #555; }
+  .btn-primary {
+    background: #3ea6ff;
+    border-color: #3ea6ff;
+    color: #000;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: #65b8ff; border-color: #65b8ff; }
+  .btn-danger { border-color: #e74c3c; color: #e74c3c; }
+  .btn-danger:hover { background: #2a0a0a; }
+  .btn-sm { padding: 3px 8px; font-size: 11px; }
+
+  /* Sections */
+  .section { padding: 14px 16px; border-bottom: 1px solid #1f1f1f; }
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #555;
+    margin-bottom: 10px;
+  }
+
+  /* Spreadsheet input */
+  .input-row { display: flex; gap: 6px; }
+  input[type="text"] {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    color: #e8e8e8;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus { border-color: #3ea6ff; }
+  input[type="text"]::placeholder { color: #444; }
+
+  /* Channel list */
+  .channel-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  .channel-list::-webkit-scrollbar { width: 4px; }
+  .channel-list::-webkit-scrollbar-track { background: transparent; }
+  .channel-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .channel-item span { color: #ccc; }
+  .channel-remove {
+    background: none; border: none;
+    color: #555; font-size: 14px; cursor: pointer;
+    padding: 0 2px; line-height: 1;
+    transition: color 0.1s;
+  }
+  .channel-remove:hover { color: #e74c3c; }
+  .empty-state {
+    color: #444; font-size: 12px; font-style: italic;
+    text-align: center; padding: 12px 0;
+  }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .stat-card .val {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .stat-card .lbl {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+  .stat-card.accent .val { color: #3ea6ff; }
+  .stat-card.green  .val { color: #2ecc71; }
+
+  /* Queue badge */
+  .queue-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .queue-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: #888;
+  }
+  .queue-badge.has-items { color: #f39c12; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #aaa;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: #2ecc71; color: #2ecc71; }
+  #toast.error   { border-color: #e74c3c; color: #e74c3c; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📚</div>
+  <div class="header-text">
+    <h1>Upskill Tracker</h1>
+    <p>YouTube learning logger</p>
+  </div>
+</div>
+
+<!-- Auth -->
+<div class="auth-section">
+  <div class="auth-status">
+    <div class="dot" id="auth-dot"></div>
+    <span id="auth-label">Not signed in</span>
+  </div>
+  <button class="btn btn-primary" id="auth-btn">Sign in with Google</button>
+</div>
+
+<!-- Spreadsheet -->
+<div class="section">
+  <div class="section-title">Google Sheet</div>
+  <div class="input-row">
+    <input type="text" id="sheet-id" placeholder="Paste your Spreadsheet ID here"/>
+    <button class="btn" id="save-sheet-btn">Save</button>
+  </div>
+  <p style="font-size:11px;color:#444;margin-top:6px;">
+    Found in the URL: spreadsheets/d/<span style="color:#3ea6ff">SPREADSHEET_ID</span>/edit
+  </p>
+</div>
+
+<!-- Whitelisted channels -->
+<div class="section">
+  <div class="section-title">Trusted channels (auto-tracked)</div>
+  <ul class="channel-list" id="channel-list">
+    <li class="empty-state" id="channel-empty">No channels added yet</li>
+  </ul>
+  <div class="input-row">
+    <input type="text" id="channel-input" placeholder="e.g. Fireship"/>
+    <button class="btn btn-primary" id="add-channel-btn">Add</button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="section">
+  <div class="section-title">This session</div>
+  <div class="stats-grid">
+    <div class="stat-card accent">
+      <div class="val" id="stat-sessions">—</div>
+      <div class="lbl">Sessions logged</div>
+    </div>
+    <div class="stat-card green">
+      <div class="val" id="stat-minutes">—</div>
+      <div class="lbl">Minutes tracked</div>
+    </div>
+  </div>
+</div>
+
+<!-- Queue -->
+<div class="section" style="border-bottom:none">
+  <div class="queue-row">
+    <div>
+      <div class="section-title" style="margin-bottom:4px">Pending queue</div>
+      <div class="queue-badge" id="queue-badge">0 items</div>
+    </div>
+    <button class="btn btn-sm" id="flush-btn">Retry now</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
